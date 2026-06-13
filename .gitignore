@@ -13,3 +13,5 @@ generatorConfig.xml
 *.lock
 /build/
 *.settings
+.github
+.vscode
