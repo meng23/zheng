@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,8 @@ import java.util.Map;
 public class CmsSettingController extends BaseController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CmsSettingController.class);
+	private static final String VALID_NAME_PATTERN = "^[A-Za-z0-9_]+$";
+	private static final String INVALID_NAME_MESSAGE = "您输入的参数有误，请正确输入";
 	
 	@Autowired
 	private CmsSettingService cmsSettingService;
@@ -43,8 +47,13 @@ public class CmsSettingController extends BaseController {
 	@ApiOperation(value = "评论首页")
 	@RequiresPermissions("cms:setting:read")
 	@RequestMapping(value = "/index", method = RequestMethod.GET)
-	public String index() {
-		return "/manage/setting/index.jsp";
+	public ModelAndView index(@RequestParam(required = false, value = "name") String name) {
+		if (!StringUtils.isBlank(name) && !name.matches(VALID_NAME_PATTERN)) {
+			ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView());
+			modelAndView.addObject("result", new CmsResult(CmsResultConstant.INVALID_PARAMETER, INVALID_NAME_MESSAGE));
+			return modelAndView;
+		}
+		return new ModelAndView("/manage/setting/index.jsp");
 	}
 
 	@ApiOperation(value = "评论列表")
