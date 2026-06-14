@@ -1,5 +1,6 @@
 package com.zheng.cms.admin.controller.manage;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baidu.unbiz.fluentvalidator.ComplexResult;
 import com.baidu.unbiz.fluentvalidator.FluentValidator;
 import com.baidu.unbiz.fluentvalidator.ResultCollectors;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +46,21 @@ public class CmsSettingController extends BaseController {
 	@ApiOperation(value = "评论首页")
 	@RequiresPermissions("cms:setting:read")
 	@RequestMapping(value = "/index", method = RequestMethod.GET)
-	public String index() {
+	public String index(@RequestParam(required = false, value = "id") Integer id, HttpServletResponse response) throws IOException {
+		CmsResult invalidParameterResult = checkIndexId(id);
+		if (null != invalidParameterResult) {
+			response.setContentType("application/json;charset=UTF-8");
+			response.getWriter().write(JSONObject.toJSONString(invalidParameterResult));
+			return null;
+		}
 		return "/manage/setting/index.jsp";
+	}
+
+	CmsResult checkIndexId(Integer id) {
+		if (null != id && id > 20000) {
+			return new CmsResult(CmsResultConstant.INVALID_PARAMETER, "参数不正确");
+		}
+		return null;
 	}
 
 	@ApiOperation(value = "评论列表")
